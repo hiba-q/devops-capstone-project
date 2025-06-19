@@ -268,3 +268,14 @@ class TestAccountService(TestCase):
         data = response.get_json()
         self.assertEqual(len(data), 0)
         self.assertEqual(data, [])
+
+    def test_method_not_allowed(self):
+        """It should not allow an unsupported HTTP method on an endpoint"""
+
+        # Attempt to POST to a GET-only endpoint
+        response = self.client.post("/health", json={}) # /health only supports GET
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        # Try PUT on the /accounts collection endpoint 
+        response = self.client.put(BASE_URL, json={})
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)s
