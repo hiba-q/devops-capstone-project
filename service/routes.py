@@ -57,12 +57,6 @@ def create_accounts():
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
-######################################################################
-# LIST ALL ACCOUNTS
-######################################################################
-
-# ... place you code here to LIST accounts ...
-
 
 ######################################################################
 # READ AN ACCOUNT
@@ -141,3 +135,19 @@ def check_content_type(media_type):
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {media_type}",
     )
+
+######################################################################
+# LIST ALL ACCOUNTS
+######################################################################
+
+@app.route("/accounts", methods=["GET"])
+def list_accounts():
+    """
+    Lists all Accounts
+    This endpoint will return all Accounts currently in the database.
+    """
+    app.logger.info("Request to list all Accounts")
+    accounts = Account.all()  # Assuming Account.all() retrieves all accounts
+    results = [account.serialize() for account in accounts]
+    app.logger.info("Returning %d accounts", len(results))
+    return jsonify(results), status.HTTP_200_OK
