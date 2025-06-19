@@ -278,4 +278,4 @@ class TestAccountService(TestCase):
 
         # Try PUT on the /accounts collection endpoint 
         response = self.client.put(BASE_URL, json={})
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)s
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
