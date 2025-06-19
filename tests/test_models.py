@@ -46,7 +46,7 @@ class TestAccount(unittest.TestCase):
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
-    
+
     def test_create_an_account(self):
         """It should Create an Account and assert that it exists"""
         fake_account = AccountFactory()
@@ -160,7 +160,9 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(serial_account["email"], account.email)
         self.assertEqual(serial_account["address"], account.address)
         self.assertEqual(serial_account["phone_number"], account.phone_number)
-        self.assertEqual(serial_account["date_joined"], str(account.date_joined))
+        self.assertEqual(
+            serial_account["date_joined"],
+            str(account.date_joined))
 
     def test_deserialize_an_account(self):
         """It should Deserialize an account"""
@@ -186,10 +188,12 @@ class TestAccount(unittest.TestCase):
         self.assertRaises(DataValidationError, account.deserialize, [])
 
     def test_deserialize_date_joined_defaults_to_today(self):
-        """It should Deserialize an account with date_joined defaulting to today"""
+        """It should Deserialize an account
+            with date_joined defaulting to today"""
         account = AccountFactory()
         serial_account = account.serialize()
-        # Remove 'date_joined' from the serialized data to simulate it being missing
+        # Remove 'date_joined' from the serialized data
+        # to simulate it being missing
         del serial_account["date_joined"]
 
         new_account = Account()
