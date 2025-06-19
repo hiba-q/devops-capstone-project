@@ -127,7 +127,7 @@ class TestAccountService(TestCase):
 
     def test_read_an_account(self):
         """It should Read a single Account"""
-        # Create an account using the helper method
+        # Create an account
         account_data = AccountFactory()
         create_response = self.client.post(BASE_URL, json=account_data.serialize())
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
@@ -135,13 +135,13 @@ class TestAccountService(TestCase):
         account_id = new_account_json["id"]
 
         # Make a GET request to read the account
-        read_response = self.client.get(
+        response = self.client.get(
             f"{BASE_URL}/{account_id}", content_type="application/json"
         )
 
         # Assertions
-        self.assertEqual(read_response.status_code, status.HTTP_200_OK)
-        returned_data = read_response.get_json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        returned_data = response.get_json()
 
         # Compare the returned data with the original data sent
         self.assertEqual(returned_data["id"], account_id)
@@ -153,5 +153,56 @@ class TestAccountService(TestCase):
 
     def test_get_account_not_found(self):
         """It should not Read an Account that is not found"""
-        resp = self.client.get(f"{BASE_URL}/0")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_account(self):
+        """It should Update an existing Account"""
+        # Create an account to update
+        account = self._create_accounts(1)[0]
+        self.assertIsNotNone(account.id)
+
+        # Update the account's name
+        new_name = "New Account Name"
+        account.name = new_name
+
+        # Make the PUT request with the updated data
+        response = self.client.put(
+            f"{BASE_URL}/{account.id}",
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_account_not_found(self):
+        """It should return 404 when updating an Account that does not exist"""
+        non_existent_id = 999999 
+        
+        update_data = {
+            "name": "NonExistent Account Update",
+            "email": "update@example.com",
+            "address": "123 Main St",
+            "phone_number": "555-123-4567",
+            "date_joined": "2023-01-01" # You might need to format dates as strings
+        }
+
+        account_data = AccountFactory() 
+        
+        # Make the PUT request with the updated data
+        response = self.client.put(
+            f"{BASE_URL}/{non_existent_id}",
+            json=update_data, 
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Verify the specific error message returned by the abort call
+        data = response.get_json()
+        self.assertIn(f"Account with id [{non_existent_id}] could not be found.", data["message"])
+        
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Verify the specific error message returned by the abort call
+        data = response.get_json()
+        self.assertIn(f"Account with id [{non_existent_id}] could not be found.", data["message"])
