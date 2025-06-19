@@ -140,6 +140,7 @@ def check_content_type(media_type):
 # LIST ALL ACCOUNTS
 ######################################################################
 
+
 @app.route("/accounts", methods=["GET"])
 def list_accounts():
     """
