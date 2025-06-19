@@ -206,3 +206,31 @@ class TestAccountService(TestCase):
         # Verify the specific error message returned by the abort call
         data = response.get_json()
         self.assertIn(f"Account with id [{non_existent_id}] could not be found.", data["message"])
+
+    def test_delete_account(self):
+        """It should Delete an Account"""
+        # Create an account to delete
+        account = self._create_accounts(1)[0]
+        # Assert that the account exists before deletion
+        response = self.client.get(f"{BASE_URL}/{account.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Make the DELETE request
+        response = self.client.delete(f"{BASE_URL}/{account.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0) # No content in 204 response
+
+        # Verify that the account is no longer found
+        response = self.client.get(f"{BASE_URL}/{account.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_account_not_found(self):
+        """It should return 204 when deleting an Account that does not exist"""
+        non_existent_id = 999999
+
+        # Make the DELETE request
+        response = self.client.delete(f"{BASE_URL}/{non_existent_id}")
+        
+        # Assersions
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0) # No content in 204 response
