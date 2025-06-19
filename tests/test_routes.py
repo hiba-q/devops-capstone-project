@@ -234,3 +234,37 @@ class TestAccountService(TestCase):
         # Assersions
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0) # No content in 204 response
+
+    def test_list_all_accounts(self):
+        """It should List all Accounts"""
+        # Create 3 accounts
+        accounts = self._create_accounts(3)
+        self.assertEqual(len(accounts), 3)
+
+        # Make a GET request to list all accounts
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Get the response JSON and verify the count
+        data = response.get_json()
+        self.assertEqual(len(data), 3)
+
+        # Verify that the names of the created accounts are in the list
+        found_names = [account_data["name"] for account_data in data]
+        for account in accounts:
+            self.assertIn(account.name, found_names)
+    
+    def test_list_no_accounts(self):
+        """It should return an empty list when no Accounts exist"""
+        # Ensure no accounts are present initially
+        db.session.query(Account).delete()
+        db.session.commit()
+
+        # Make a GET request to list all accounts
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify that the returned data is an empty list
+        data = response.get_json()
+        self.assertEqual(len(data), 0)
+        self.assertEqual(data, [])
