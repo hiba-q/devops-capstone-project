@@ -8,6 +8,7 @@ import os
 from service import app
 from service.models import Account, DataValidationError, db
 from tests.factories import AccountFactory
+from datetime import date
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -45,7 +46,7 @@ class TestAccount(unittest.TestCase):
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
-
+    
     def test_create_an_account(self):
         """It should Create an Account and assert that it exists"""
         fake_account = AccountFactory()
@@ -142,6 +143,14 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(same_account.id, account.id)
         self.assertEqual(same_account.name, account.name)
 
+    def test_repr(self):
+        """It should return a string representation of the Account"""
+        account = AccountFactory()
+        account.create()
+
+        expected_repr = f"<Account {account.name} id=[{account.id}]>"
+        self.assertEqual(str(account), expected_repr)
+
     def test_serialize_an_account(self):
         """It should Serialize an account"""
         account = AccountFactory()
@@ -175,3 +184,20 @@ class TestAccount(unittest.TestCase):
         """It should not Deserialize an account with a TypeError"""
         account = Account()
         self.assertRaises(DataValidationError, account.deserialize, [])
+
+    def test_deserialize_date_joined_defaults_to_today(self):
+        """It should Deserialize an account with date_joined defaulting to today"""
+        account = AccountFactory()
+        serial_account = account.serialize()
+        # Remove 'date_joined' from the serialized data to simulate it being missing
+        del serial_account["date_joined"]
+
+        new_account = Account()
+        new_account.deserialize(serial_account)
+
+        self.assertEqual(new_account.name, account.name)
+        self.assertEqual(new_account.email, account.email)
+        self.assertEqual(new_account.address, account.address)
+        self.assertEqual(new_account.phone_number, account.phone_number)
+        # Assert that date_joined is today's date
+        self.assertEqual(new_account.date_joined, date.today())
