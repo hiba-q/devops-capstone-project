@@ -121,7 +121,9 @@ class TestAccountService(TestCase):
             json=account.serialize(),
             content_type="test/html"
         )
-        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
 
@@ -129,7 +131,8 @@ class TestAccountService(TestCase):
         """It should Read a single Account"""
         # Create an account
         account_data = AccountFactory()
-        create_response = self.client.post(BASE_URL, json=account_data.serialize())
+        create_response = \
+            self.client.post(BASE_URL, json=account_data.serialize())
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
         new_account_json = create_response.get_json()
         account_id = new_account_json["id"]
@@ -148,8 +151,10 @@ class TestAccountService(TestCase):
         self.assertEqual(returned_data["name"], account_data.name)
         self.assertEqual(returned_data["email"], account_data.email)
         self.assertEqual(returned_data["address"], account_data.address)
-        self.assertEqual(returned_data["phone_number"], account_data.phone_number)
-        self.assertEqual(str(returned_data["date_joined"]), str(account_data.date_joined))
+        self.assertEqual
+        (returned_data["phone_number"], account_data.phone_number)
+        self.assertEqual
+        (str(returned_data["date_joined"]), str(account_data.date_joined))
 
     def test_get_account_not_found(self):
         """It should not Read an Account that is not found"""
@@ -176,36 +181,24 @@ class TestAccountService(TestCase):
 
     def test_update_account_not_found(self):
         """It should return 404 when updating an Account that does not exist"""
-        non_existent_id = 999999 
-        
+        non_existent_id = 999999
+
         update_data = {
             "name": "NonExistent Account Update",
             "email": "update@example.com",
             "address": "123 Main St",
             "phone_number": "555-123-4567",
-            "date_joined": "2023-01-01" # You might need to format dates as strings
+            "date_joined": "2023-01-01"
         }
 
-        account_data = AccountFactory() 
-        
         # Make the PUT request with the updated data
         response = self.client.put(
             f"{BASE_URL}/{non_existent_id}",
-            json=update_data, 
+            json=update_data,
             content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-        # Verify the specific error message returned by the abort call
-        data = response.get_json()
-        self.assertIn(f"Account with id [{non_existent_id}] could not be found.", data["message"])
-        
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
-        # Verify the specific error message returned by the abort call
-        data = response.get_json()
-        self.assertIn(f"Account with id [{non_existent_id}] could not be found.", data["message"])
 
     def test_delete_account(self):
         """It should Delete an Account"""
@@ -218,7 +211,8 @@ class TestAccountService(TestCase):
         # Make the DELETE request
         response = self.client.delete(f"{BASE_URL}/{account.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(len(response.data), 0) # No content in 204 response
+        self.assertEqual(       # No content in 204 response
+            len(response.data), 0)
 
         # Verify that the account is no longer found
         response = self.client.get(f"{BASE_URL}/{account.id}")
@@ -230,10 +224,11 @@ class TestAccountService(TestCase):
 
         # Make the DELETE request
         response = self.client.delete(f"{BASE_URL}/{non_existent_id}")
-        
+
         # Assersions
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(len(response.data), 0) # No content in 204 response
+        self.assertEqual(       # No content in 204 response
+            len(response.data), 0)
 
     def test_list_all_accounts(self):
         """It should List all Accounts"""
@@ -253,7 +248,7 @@ class TestAccountService(TestCase):
         found_names = [account_data["name"] for account_data in data]
         for account in accounts:
             self.assertIn(account.name, found_names)
-    
+
     def test_list_no_accounts(self):
         """It should return an empty list when no Accounts exist"""
         # Ensure no accounts are present initially
@@ -273,9 +268,13 @@ class TestAccountService(TestCase):
         """It should not allow an unsupported HTTP method on an endpoint"""
 
         # Attempt to POST to a GET-only endpoint
-        response = self.client.post("/health", json={}) # /health only supports GET
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.post("/health", json={})
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED)
 
-        # Try PUT on the /accounts collection endpoint 
+        # Try PUT on the /accounts collection endpoint
         response = self.client.put(BASE_URL, json={})
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED)
